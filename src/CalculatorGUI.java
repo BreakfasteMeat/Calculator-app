@@ -62,6 +62,9 @@ public class CalculatorGUI extends JFrame{
 	public void clearField(){
 		displayField.setText("");
 	}
+	public void setDisplayField(String s){
+		displayField.setText(s);
+	}
 
 	public JButton getNumberButtons(int index){
 		return numberButtons[index];
