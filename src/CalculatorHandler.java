@@ -30,58 +30,25 @@ public class CalculatorHandler{
 			operations.clear();
 		});
 		GUI.getEqualsButton().addActionListener(e ->{
-//			inHighPrecedenceOperation = false;
-//			numbers.add(current);
-//			current = calculate();
-//			GUI.setDisplayField(String.valueOf(current));
-			GUI.setDisplayField("Hello, World!");
+
+			current = parseStringtoEquation(GUI.getDisplayedText());
+			GUI.setDisplayField(String.valueOf(current));
 		});
 		GUI.getAddButton().addActionListener(e ->{
 			GUI.typeCharacter(String.valueOf('+'));
-			if(inHighPrecedenceOperation){
-				numbers.add(calculateHighPrecedence(operations.pollLast(),numbers.pollLast(),numbers.pollLast()));
-				inHighPrecedenceOperation = false;
-			}
-			System.out.println("Pusing " + current);
-			numbers.add(current);
-			current = 0.0;
-			operations.add('+');
 		});
 		GUI.getSubtractButton().addActionListener(e ->{
 			GUI.typeCharacter(String.valueOf('-'));
-			if(inHighPrecedenceOperation){
-				numbers.add(calculateHighPrecedence(operations.pollLast(),numbers.pollLast(),numbers.pollLast()));
-				inHighPrecedenceOperation = false;
-			}
-			numbers.add(current);
-			current = 0.0;
-			operations.add('-');
 		});
 		GUI.getMultiplyButton().addActionListener(e ->{
 			GUI.typeCharacter(String.valueOf('×'));
-
-			numbers.add(current);
-			current = 0.0;
-			operations.add('*');
-			if(inHighPrecedenceOperation){
-				numbers.add(calculateHighPrecedence(operations.pollLast(),numbers.pollLast(),numbers.pollLast()));
-			}
-			this.inHighPrecedenceOperation = true;
 		});
 		GUI.getDivideButton().addActionListener(e ->{
 			GUI.typeCharacter(String.valueOf('÷'));
-
-			numbers.add(current);
-			current = 0.0;
-			operations.add('/');
-			if(inHighPrecedenceOperation){
-				numbers.add(calculateHighPrecedence(operations.pollLast(),numbers.pollLast(),numbers.pollLast()));
-			}
-			this.inHighPrecedenceOperation = true;
 		});
 
 	}
-	double calculateHighPrecedence(Character c,Double num1, Double num2){
+	double calculateHighPrecedence(Character c,Double num2, Double num1){
 		switch(c){
 			case '*':
 				model.multiply(num1,num2);
@@ -94,6 +61,71 @@ public class CalculatorHandler{
 			default:
 				throw new IllegalStateException("Unexpected value: " + c);
 		}
+	}
+	boolean isOperation(char c){
+		return c == '+' || c == '-' || c == '×' || c == '÷';
+	}
+	void processAddition(){
+		processHighPrecedence();
+		operations.add('+');
+	}
+	void processSubtraction(){
+		processHighPrecedence();
+		operations.add('-');
+	}
+	void processMultiplication(){
+		processHighPrecedence();
+		operations.add('*');
+		this.inHighPrecedenceOperation = true;
+	}
+	void processDivision(){
+		if(inHighPrecedenceOperation){
+			numbers.add(calculateHighPrecedence(operations.pollLast(),numbers.pollLast(),numbers.pollLast()));
+		}
+		operations.add('/');
+		this.inHighPrecedenceOperation = true;
+	}
+	void processOperation(char c){
+		switch(c){
+			case '+':
+				processAddition();
+				break;
+			case '-':
+				processSubtraction();
+				break;
+			case '×':
+				processMultiplication();
+				break;
+			case '÷':
+				processDivision();
+				break;
+			default:
+				throw new ArithmeticException("Invalid operation!");
+		}
+	}
+	void processHighPrecedence(){
+		if(inHighPrecedenceOperation){
+			numbers.add(calculateHighPrecedence(operations.pollLast(),numbers.pollLast(),numbers.pollLast()));
+			inHighPrecedenceOperation = false;
+		}
+	}
+	double parseStringtoEquation(String equation){
+		String number = "";
+		for(int i = 0;i < equation.length();i++){
+			char c = equation.charAt(i);
+			if(Character.isDigit(c)){
+				number += c;
+				if (i == equation.length() - 1){
+					numbers.add(Double.parseDouble(number));
+					processHighPrecedence();
+				}
+			} else if(isOperation(c)){
+				numbers.add(Double.parseDouble(number));
+				number = "";
+				processOperation(c);
+			}
+		}
+		return calculate();
 	}
 	double calculate(){
 		double currentValue = numbers.pollFirst();
@@ -108,10 +140,6 @@ public class CalculatorHandler{
 					break;
 				case '-':
 					model.subtract(currentValue,nextValue);
-					currentValue = model.getResult();
-					break;
-				case '*':
-					model.multiply(currentValue,nextValue);
 					currentValue = model.getResult();
 					break;
 			}
