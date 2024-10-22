@@ -10,6 +10,10 @@ public class CalculatorGUI extends JFrame{
 	private final JButton divideButton = new JButton("÷");
 	private final JButton equalsButton = new JButton("=");
 	private final JButton clearButton = new JButton("CE");
+	private final JButton backspaceButton = new JButton("⌫");
+	private final JButton percentButton = new JButton("%");
+	private final JButton decimalPointButton = new JButton(".");
+	private final JButton magicButton = new JButton("Magic!");
 	public CalculatorGUI(){
 		this.setTitle("Calculator");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -18,31 +22,33 @@ public class CalculatorGUI extends JFrame{
 
 
 		JPanel panel = new JPanel();
-		panel.setLayout(new GridLayout(4, 4));
+		panel.setLayout(new GridLayout(5, 4));
+
+		panel.add(clearButton);
+		panel.add(backspaceButton);
+		panel.add(percentButton);
+		panel.add(divideButton);
 		for (int i = 7; i < 10; i++) {
 			numberButtons[i] = new JButton(String.valueOf(i));
 			panel.add(numberButtons[i]);
 		}
-		panel.add(clearButton);
-
+		panel.add(multiplyButton);
 		for (int i = 4; i < 7; i++) {
 			numberButtons[i] = new JButton(String.valueOf(i));
 			panel.add(numberButtons[i]);
 		}
-		panel.add(addButton);
-
+		panel.add(subtractButton);
 		for (int i = 1; i < 4; i++) {
 			numberButtons[i] = new JButton(String.valueOf(i));
 			panel.add(numberButtons[i]);
 		}
-		panel.add(subtractButton);
-
+		panel.add(addButton);
+		panel.add(magicButton);
 		numberButtons[0] = new JButton("0");
 		panel.add(numberButtons[0]);
-
+		panel.add(decimalPointButton);
 		panel.add(equalsButton);
-		panel.add(divideButton);
-		panel.add(multiplyButton);
+
 
 
 		displayField.setPreferredSize(new Dimension(200,80));
@@ -92,5 +98,21 @@ public class CalculatorGUI extends JFrame{
 
 	public JButton getClearButton(){
 		return clearButton;
+	}
+
+	public JButton getBackspaceButton(){
+		return backspaceButton;
+	}
+
+	public JButton getPercentButton(){
+		return percentButton;
+	}
+
+	public JButton getDecimalPointButton(){
+		return decimalPointButton;
+	}
+
+	public JButton getMagicButton(){
+		return magicButton;
 	}
 }

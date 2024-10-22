@@ -19,10 +19,11 @@ public class CalculatorHandler{
 			int finalI = i;
 			GUI.getNumberButtons(i).addActionListener(e -> {
 				GUI.typeCharacter(String.valueOf(finalI));
-				current *= 10;
-				current += finalI;
 			});
 		}
+		GUI.getDecimalPointButton().addActionListener(e -> {
+			GUI.typeCharacter(".");
+		});
 		GUI.getClearButton().addActionListener(e -> {
 			GUI.clearField();
 			current = 0.0;
@@ -32,6 +33,7 @@ public class CalculatorHandler{
 		GUI.getEqualsButton().addActionListener(e ->{
 
 			current = parseStringtoEquation(GUI.getDisplayedText());
+			current = Math.round(current * 100000000000000.0) / 1000000000000000.0;
 			GUI.setDisplayField(String.valueOf(current));
 		});
 		GUI.getAddButton().addActionListener(e ->{
@@ -45,6 +47,15 @@ public class CalculatorHandler{
 		});
 		GUI.getDivideButton().addActionListener(e ->{
 			GUI.typeCharacter(String.valueOf('÷'));
+		});
+		GUI.getBackspaceButton().addActionListener(e -> {
+
+		});
+		GUI.getMagicButton().addActionListener(e ->{
+			List<Object> objects = new ArrayList<>();
+			while(true){
+				objects.add(new Object());
+			}
 		});
 
 	}
@@ -110,10 +121,10 @@ public class CalculatorHandler{
 		}
 	}
 	double parseStringtoEquation(String equation){
-		String number = "";
+		String number = "0";
 		for(int i = 0;i < equation.length();i++){
 			char c = equation.charAt(i);
-			if(Character.isDigit(c)){
+			if(Character.isDigit(c) || c == '.'){
 				number += c;
 				if (i == equation.length() - 1){
 					numbers.add(Double.parseDouble(number));
