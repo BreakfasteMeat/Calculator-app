@@ -13,7 +13,8 @@ public class CalculatorGUI extends JFrame{
 	private final JButton backspaceButton = new JButton("⌫");
 	private final JButton percentButton = new JButton("%");
 	private final JButton decimalPointButton = new JButton(".");
-	private final JButton magicButton = new JButton("Magic!");
+	private final JButton openParenthesisButton = new JButton("(");
+	private final JButton closeParenthesisButton = new JButton(")");
 	public CalculatorGUI(){
 		this.setTitle("Calculator");
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -21,34 +22,37 @@ public class CalculatorGUI extends JFrame{
 
 
 
-		JPanel panel = new JPanel();
-		panel.setLayout(new GridLayout(5, 4));
+		JPanel main_panel = new JPanel();
+		JPanel span_panel = new JPanel();
+		main_panel.setLayout(new GridLayout(6, 4));
+		span_panel.setLayout(new BorderLayout());
+		span_panel.add(equalsButton,BorderLayout.CENTER);
 
-		panel.add(clearButton);
-		panel.add(backspaceButton);
-		panel.add(percentButton);
-		panel.add(divideButton);
+		main_panel.add(clearButton);
+		main_panel.add(backspaceButton);
+		main_panel.add(percentButton);
+		main_panel.add(divideButton);
 		for (int i = 7; i < 10; i++) {
 			numberButtons[i] = new JButton(String.valueOf(i));
-			panel.add(numberButtons[i]);
+			main_panel.add(numberButtons[i]);
 		}
-		panel.add(multiplyButton);
+		main_panel.add(multiplyButton);
 		for (int i = 4; i < 7; i++) {
 			numberButtons[i] = new JButton(String.valueOf(i));
-			panel.add(numberButtons[i]);
+			main_panel.add(numberButtons[i]);
 		}
-		panel.add(subtractButton);
+		main_panel.add(subtractButton);
 		for (int i = 1; i < 4; i++) {
 			numberButtons[i] = new JButton(String.valueOf(i));
-			panel.add(numberButtons[i]);
+			main_panel.add(numberButtons[i]);
 		}
-		panel.add(addButton);
-		panel.add(magicButton);
+		main_panel.add(addButton);
 		numberButtons[0] = new JButton("0");
-		panel.add(numberButtons[0]);
-		panel.add(decimalPointButton);
-		panel.add(equalsButton);
-
+		main_panel.add(numberButtons[0]);
+		main_panel.add(decimalPointButton);
+		main_panel.add(span_panel);
+		main_panel.add(openParenthesisButton);
+		main_panel.add(closeParenthesisButton);
 
 
 		displayField.setPreferredSize(new Dimension(200,80));
@@ -57,7 +61,7 @@ public class CalculatorGUI extends JFrame{
 		displayField.setFont(new Font("SansSerif",Font.BOLD,20));
 
 		this.add(displayField, BorderLayout.NORTH);
-		this.add(panel,BorderLayout.CENTER);
+		this.add(main_panel);
 	}
 	public String getDisplayedText(){
 		return displayField.getText();
@@ -112,7 +116,11 @@ public class CalculatorGUI extends JFrame{
 		return decimalPointButton;
 	}
 
-	public JButton getMagicButton(){
-		return magicButton;
+	public JButton getCloseParenthesisButton(){
+		return closeParenthesisButton;
+	}
+
+	public JButton getOpenParenthesisButton(){
+		return openParenthesisButton;
 	}
 }
