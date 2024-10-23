@@ -1,15 +1,22 @@
-public class CalculatorModel{
-	private double result;
+import java.math.*;
 
-	public double getResult(){
+public class CalculatorModel{
+	private BigDecimal result;
+
+	public BigDecimal getResult(){
 		return result;
 	}
 
-	public void add(double num1, double num2){ result = num1 + num2; }
-
-	public void subtract(double num1, double num2){ result = num1 - num2; }
-
-	public void multiply(double num1, double num2){ result = num1 * num2; }
-
-	public void divide(double num1, double num2){ result = num1 / num2; }
+	public void add(BigDecimal a, BigDecimal b){
+		result = a.add(b);
+	}
+	public void subtract(BigDecimal a, BigDecimal b){
+		result = a.subtract(b);
+	}
+	public void multiply(BigDecimal a, BigDecimal b){
+		result = a.multiply(b);
+	}
+	public void divide(BigDecimal a, BigDecimal b){
+		result = a.divide(b, 20,RoundingMode.HALF_UP);
+	}
 }

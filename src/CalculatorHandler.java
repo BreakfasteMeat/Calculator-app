@@ -1,12 +1,14 @@
 import java.util.*;
+import java.math.BigDecimal;
 
 public class CalculatorHandler{
 	private CalculatorModel model;
 	private CalculatorGUI GUI;
-	private Deque<Double> numbers;
+	private Deque<BigDecimal> numbers;
 	private Deque<Character> operations;
-	private Boolean inHighPrecedenceOperation;
-	private Double current = 0.0;
+	private boolean inHighPrecedenceOperation;
+	private BigDecimal current = BigDecimal.valueOf(0.0);
+	private boolean isFromComputation = false;
 
 	public CalculatorHandler(CalculatorModel model, CalculatorGUI GUI){
 		this.model = model;
@@ -18,7 +20,11 @@ public class CalculatorHandler{
 		for(int i = 0;i < 10;i++){
 			int finalI = i;
 			GUI.getNumberButtons(i).addActionListener(e -> {
-				GUI.typeCharacter(String.valueOf(finalI));
+				if(isFromComputation){
+					isFromComputation = false;
+					GUI.clearField();
+				}
+				this.GUI.typeCharacter(String.valueOf(finalI));
 			});
 		}
 		GUI.getDecimalPointButton().addActionListener(e -> {
@@ -26,40 +32,42 @@ public class CalculatorHandler{
 		});
 		GUI.getClearButton().addActionListener(e -> {
 			GUI.clearField();
-			current = 0.0;
+			current = new BigDecimal("0.0");
 			numbers.clear();
 			operations.clear();
 		});
 		GUI.getEqualsButton().addActionListener(e ->{
 
 			current = parseStringtoEquation(GUI.getDisplayedText());
-			current = Math.round(current * 100000000000000.0) / 1000000000000000.0;
 			GUI.setDisplayField(String.valueOf(current));
+			isFromComputation = true;
 		});
 		GUI.getAddButton().addActionListener(e ->{
 			GUI.typeCharacter(String.valueOf('+'));
+			isFromComputation = false;
 		});
 		GUI.getSubtractButton().addActionListener(e ->{
 			GUI.typeCharacter(String.valueOf('-'));
+			isFromComputation = false;
 		});
 		GUI.getMultiplyButton().addActionListener(e ->{
 			GUI.typeCharacter(String.valueOf('×'));
+			isFromComputation = false;
 		});
 		GUI.getDivideButton().addActionListener(e ->{
 			GUI.typeCharacter(String.valueOf('÷'));
+			isFromComputation = false;
 		});
 		GUI.getBackspaceButton().addActionListener(e -> {
-
+			GUI.setDisplayField(GUI.getDisplayedText().substring(0,GUI.getDisplayedText().length() - 1));
 		});
-		GUI.getMagicButton().addActionListener(e ->{
-			List<Object> objects = new ArrayList<>();
-			while(true){
-				objects.add(new Object());
-			}
+
+		GUI.getPercentButton().addActionListener(e -> {
+			GUI.setDisplayField(String.valueOf(Double.parseDouble(GUI.getDisplayedText()) * 0.01));
 		});
 
 	}
-	double calculateHighPrecedence(Character c,Double num2, Double num1){
+	BigDecimal calculateHighPrecedence(Character c,BigDecimal num2, BigDecimal num1){
 		switch(c){
 			case '*':
 				model.multiply(num1,num2);
@@ -120,27 +128,34 @@ public class CalculatorHandler{
 			inHighPrecedenceOperation = false;
 		}
 	}
-	double parseStringtoEquation(String equation){
+	BigDecimal parseStringtoEquation(String equation){
 		String number = "0";
+		boolean isNotENotation = true;
 		for(int i = 0;i < equation.length();i++){
 			char c = equation.charAt(i);
-			if(Character.isDigit(c) || c == '.'){
+			if(Character.isDigit(c) || c == '.' || c == 'E' || !isNotENotation){
 				number += c;
 				if (i == equation.length() - 1){
-					numbers.add(Double.parseDouble(number));
+					numbers.add(new BigDecimal(number));
+					System.out.println(number);
 					processHighPrecedence();
 				}
-			} else if(isOperation(c)){
-				numbers.add(Double.parseDouble(number));
+				if(c == 'E') isNotENotation = false;
+				if((c == '-' || Character.isDigit(c)) && !isNotENotation){
+					isNotENotation = true;
+				}
+			} else if(isOperation(c) && isNotENotation){
+				System.out.println(number);
+				numbers.add(new BigDecimal(number));
 				number = "";
 				processOperation(c);
 			}
 		}
 		return calculate();
 	}
-	double calculate(){
-		double currentValue = numbers.pollFirst();
-		double nextValue = 0;
+	BigDecimal calculate(){
+		BigDecimal currentValue = numbers.pollFirst();
+		BigDecimal nextValue;
 		while(!operations.isEmpty()){
 			Character c = operations.pollFirst();
 			nextValue = numbers.pollFirst();
