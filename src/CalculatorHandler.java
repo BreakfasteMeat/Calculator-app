@@ -5,8 +5,6 @@ import java.math.BigDecimal;
 public class CalculatorHandler{
 	private CalculatorModel model;
 	private CalculatorGUI GUI;
-	private Deque<BigDecimal> numbers;
-	private Deque<Character> operations;
 	private boolean inHighPrecedenceOperation;
 	private BigDecimal current = BigDecimal.valueOf(0.0);
 	private boolean isFromComputation = false;
@@ -29,12 +27,16 @@ public class CalculatorHandler{
 		int index = equation.length();
 		for(int i = 0;i <= positions_back;i++){
 			result = "";
-			do{
-				index--;
-				if(!isOperation(equation.charAt(index))) result = equation.charAt(index) + result;
-				System.out.println("Adding " + equation.charAt(index) + " to result");
+			try {
+				do {
+					index--;
+					if (!isOperation(equation.charAt(index))) result = equation.charAt(index) + result;
+					System.out.println("Adding " + equation.charAt(index) + " to result");
 
-			}while(!isOperation(equation.charAt(index)) && index > 0);
+				} while (!isOperation(equation.charAt(index)) && index > 0);
+			} catch (IndexOutOfBoundsException exc){
+				return "1";
+			}
 		}
 		System.out.println(result);
 		return result;
@@ -44,8 +46,6 @@ public class CalculatorHandler{
 		this.model = model;
 		this.GUI = GUI;
 		this.inHighPrecedenceOperation = false;
-		numbers = new LinkedList<>();
-		operations = new LinkedList<>();
 
 		for(int i = 0;i < 10;i++){
 			int finalI = i;
@@ -57,14 +57,12 @@ public class CalculatorHandler{
 				this.GUI.typeCharacter(String.valueOf(finalI));
 			});
 		}
-		GUI.getDecimalPointButton().addActionListener(e -> {
-			GUI.typeCharacter(".");
-		});
+		GUI.getDecimalPointButton().addActionListener(e -> GUI.typeCharacter("."));
+		GUI.getOpenParenthesisButton().addActionListener(e -> GUI.typeCharacter("("));
+		GUI.getCloseParenthesisButton().addActionListener(e -> GUI.typeCharacter(")"));
 		GUI.getClearButton().addActionListener(e -> {
 			GUI.clearField();
 			current = new BigDecimal("0.0");
-			numbers.clear();
-			operations.clear();
 		});
 		GUI.getEqualsButton().addActionListener(e ->{
 			current = parseStringtoEquation(GUI.getDisplayedText());
@@ -87,14 +85,11 @@ public class CalculatorHandler{
 			GUI.typeCharacter(String.valueOf('÷'));
 			isFromComputation = false;
 		});
-		GUI.getBackspaceButton().addActionListener(e -> {
-			GUI.setDisplayField(GUI.getDisplayedText().substring(0,GUI.getDisplayedText().length() - 1));
-		});
+		GUI.getBackspaceButton().addActionListener(e -> GUI.setDisplayField(GUI.getDisplayedText().substring(0,GUI.getDisplayedText().length() - 1)));
 
 		GUI.getPercentButton().addActionListener(e -> {
+
 			String percentage = "", percentage_of = "";
-			String equation = GUI.getDisplayedText();
-			int index = equation.length() - 1;
 			percentage = getNumber(0);
 			percentage_of = getNumber(1);
 			GUI.setDisplayField(GUI.getDisplayedText().substring(0,GUI.getDisplayedText().length() - percentage.length()));
@@ -104,7 +99,6 @@ public class CalculatorHandler{
 			System.out.println("Getting " + percentage_value + "% of " + percentage_of_value);
 			BigDecimal result = percentage_value.multiply(percentage_of_value.multiply(new BigDecimal("0.01")));
 			GUI.setDisplayField(GUI.getDisplayedText() + result);
-
 		});
 
 	}
@@ -126,57 +120,62 @@ public class CalculatorHandler{
 	boolean isOperation(char c){
 		return c == '+' || c == '-' || c == '×' || c == '÷';
 	}
-	void processAddition(){
-		processHighPrecedence();
+	void processAddition(Deque<BigDecimal> numbers, Deque<Character> operations){
+		processHighPrecedence(numbers, operations);
 		operations.add('+');
 	}
-	void processSubtraction(){
-		processHighPrecedence();
+	void processSubtraction(Deque<BigDecimal> numbers, Deque<Character> operations){
+		processHighPrecedence(numbers, operations);
 		operations.add('-');
 	}
-	void processMultiplication(){
-		processHighPrecedence();
+	void processMultiplication(Deque<BigDecimal> numbers, Deque<Character> operations){
+		processHighPrecedence(numbers, operations);
 		operations.add('*');
 		this.inHighPrecedenceOperation = true;
 	}
-	void processDivision(){
+	void processDivision(Deque<BigDecimal> numbers, Deque<Character> operations){
 		if(inHighPrecedenceOperation){
 			numbers.add(calculateHighPrecedence(operations.pollLast(),numbers.pollLast(),numbers.pollLast()));
 		}
 		operations.add('/');
 		this.inHighPrecedenceOperation = true;
 	}
-	void processOperation(char c){
+	void processOperation(char c,Deque<BigDecimal> numbers, Deque<Character> operations){
 		switch(c){
 			case '+':
-				processAddition();
+				processAddition(numbers, operations);
 				break;
 			case '-':
-				processSubtraction();
+				processSubtraction(numbers, operations);
 				break;
 			case '×':
-				processMultiplication();
+				processMultiplication(numbers, operations);
 				break;
 			case '÷':
-				processDivision();
+				processDivision(numbers, operations);
 				break;
 			default:
 				throw new ArithmeticException("Invalid operation!");
 		}
 	}
-	void processHighPrecedence(){
+	void processHighPrecedence(Deque<BigDecimal> numbers, Deque<Character> operations){
 		if(inHighPrecedenceOperation){
 			numbers.add(calculateHighPrecedence(operations.pollLast(),numbers.pollLast(),numbers.pollLast()));
 			inHighPrecedenceOperation = false;
 		}
 	}
 	BigDecimal parseStringtoEquation(String equation){
+		Deque<BigDecimal> numbers = new LinkedList<>();
+		Deque<Character> operations = new LinkedList<>();
+		inHighPrecedenceOperation = false;
 		String number = "0";
 		boolean isNotENotation = true;
 		for(int i = 0;i < equation.length();i++){
 			if(parenthesisJump != -1){
-				i = parenthesisJump + 1;
+				System.out.println("Jumping to " + parenthesisJump + i);
+				i += parenthesisJump - 1;
 				parenthesisJump = -1;
+				break;
 			}
 			char c = equation.charAt(i);
 			if(Character.isDigit(c) || c == '.' || c == 'E' || !isNotENotation){
@@ -184,7 +183,7 @@ public class CalculatorHandler{
 				if (i == equation.length() - 1){
 					numbers.add(new BigDecimal(number));
 					System.out.println(number);
-					processHighPrecedence();
+					processHighPrecedence(numbers, operations);
 				}
 				if(c == 'E') isNotENotation = false;
 				if((c == '-' || Character.isDigit(c)) && !isNotENotation){
@@ -194,17 +193,22 @@ public class CalculatorHandler{
 				System.out.println(number);
 				numbers.add(new BigDecimal(number));
 				number = "";
-				processOperation(c);
+				processOperation(c,numbers, operations);
 			} else if(c == '('){
 				//TODO Parenthesis logic
-				//numbers.add(parseStringtoEquation(equation.substring(i)));
+				System.out.println("Passing " + (equation.substring(i+1)));
+				numbers.add(new BigDecimal(String.valueOf(parseStringtoEquation(equation.substring(++i)))));
 			} else if(c == ')'){
-				//return calculate();
+				parenthesisJump = equation.length() - 1;
+				System.out.println("Adding " + number);
+				numbers.add(new BigDecimal(number));
+				System.out.println("Returning " + calculate(numbers, operations));
+				return calculate(numbers, operations);
 			}
 		}
-		return calculate();
+		return calculate(numbers, operations);
 	}
-	BigDecimal calculate(){
+	BigDecimal calculate(Deque<BigDecimal> numbers, Deque<Character> operations){
 		BigDecimal currentValue = numbers.pollFirst();
 		BigDecimal nextValue;
 		while(!operations.isEmpty()){
