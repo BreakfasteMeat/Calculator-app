@@ -168,7 +168,7 @@ public class CalculatorHandler{
 			} else if(c == '('){
 				Stack<Character> parentheses = new Stack<>();
 				parentheses.push('(');
-				int j = 0;
+				int j;
 				for(j = i + 1;!parentheses.isEmpty();j++){
 					if(equation.charAt(j) == '('){
 						parentheses.push(equation.charAt(j));
